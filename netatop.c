@@ -102,8 +102,8 @@
 #include <net/tcp.h>
 #include <net/udp.h>
 
-#include "./netatop.h"
-#include "./netatopversion.h"
+#include "netatop.h"
+#include "netatopversion.h"
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Gerlof Langeveld <gerlof.langeveld@atoptool.nl>");
@@ -965,7 +965,11 @@ get_taskinfo(pid_t id, char type)
 	tip->id    	= id;
 	tip->type    	= type;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 5, 0)
+	tip->btime	= div_u64((current->start_boottime +
+				(boottime.tv_sec * NSEC_PER_SEC +
+					boottime.tv_sec)), NSEC_PER_SEC);
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0)
 	tip->btime	= div_u64((current->real_start_time +
 				(boottime.tv_sec * NSEC_PER_SEC +
 					boottime.tv_sec)), NSEC_PER_SEC);
@@ -1599,8 +1603,8 @@ getsockopt(struct sock *sk, int cmd, void __user *user, int *len)
 		return 0;
 
  	   case NETATOP_GETCNT_TGID:
-		tasktype = 'g';
-
+		tasktype = 'g';		
+		// fall through
  	   case NETATOP_GETCNT_PID:
 		if (*len < sizeof(pid_t))
 			return -EINVAL;
