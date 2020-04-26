@@ -1,30 +1,21 @@
-KVERSION := $(shell uname -r)
-KDIR := /lib/modules/$(KVERSION)/build
-PWD := $(shell pwd)
+MYMODULE = netatop
+KERNDIR = /lib/modules/$(shell uname -r)/build
+THISDIR = $(shell pwd)
 
-obj-m := netatop.o
+all: $(MYMODULE).ko
 
-netatop.o: netatop.h netatopversion.h
+obj-m := $(MYMODULE).o
 
-default:
+$(MYMODULE).ko: $(MYMODULE).c $(MYMODULE).h
 	./mkversion
-	netatop.ko: netatop.c
-		$(MAKE) -C $(KDIR) M=$(PWD) modules
+	make -C $(KERNDIR) M=$(THISDIR) modules
 
-install:
-	netatop.ko
-	install -d /lib/modules/`uname -r`/extra
-	install -m 0644 module/netatop.ko -t /lib/modules/`uname -r`/extra
-	depmod
+install: $(MYMODULE).ko
+	make -C $(KERNDIR) M=$(THISDIR) modules_install
 
 clean:
-	rm -f *.o *.ko
-	rm -f .netatop*
-	rm -f netatop.ko.unsigned netatop.mod.c
-	rm -f Module.symvers
-	rm -f modules.order
-	rm -f .tmp_versions
+	make -C $(KERNDIR) M=$(THISDIR) clean
 
 load:
-	./sbin/rmmod netatop
-	/sbin/insmod netatop.ko
+	-/sbin/rmmod $(MYMODULE)
+	/sbin/insmod $(MYMODULE).ko

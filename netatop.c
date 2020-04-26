@@ -270,7 +270,7 @@ static unsigned long long	gclast;	// last garbage collection (jiffies)
 
 static struct task_struct	*knetatop_task;
 
-static struct timespec	boottime;
+static struct timespec64	boottime;
 
 /*
 ** function prototypes
@@ -346,12 +346,11 @@ static struct nf_sockopt_ops sockopts = {
         .owner          = THIS_MODULE,
 };
 
-static struct file_operations netatop_proc_fops = {
-	.open           = netatop_open,
-	.read	        = seq_read,
-	.llseek	        = seq_lseek,
-	.release	= single_release,
-	.owner          = THIS_MODULE,
+static struct proc_ops netatop_proc_fops = {
+	.proc_open      = netatop_open,
+	.proc_read	= seq_read,
+	.proc_lseek	= seq_lseek,
+	.proc_release	= single_release,
 };
 
 
@@ -1745,7 +1744,7 @@ init_module()
 		spin_lock_init(&shash[i].lock);
 	}
 
-	getboottime(&boottime);
+	getboottime64(&boottime);
 
 	/*
 	** register getsockopt for user space communication

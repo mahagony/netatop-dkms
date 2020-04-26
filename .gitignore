@@ -1,0 +1,9 @@
+netatopversion.h
+*.swp
+.*.cmd
+*.symvers
+*.order
+*.mod.*
+*.mod
+*.ko
+*.o
